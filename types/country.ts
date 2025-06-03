@@ -22,4 +22,5 @@ export interface Country {
       symbol: string;
     }
   >;
+  translations?: Record<string, { official: string; common: string }>;
 }
