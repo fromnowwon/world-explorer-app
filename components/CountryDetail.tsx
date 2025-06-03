@@ -1,10 +1,19 @@
 "use client";
 
-import { Country } from "@/types/country";
 import Image from "next/image";
-import { Card, Descriptions } from "antd";
+import { Country } from "@/types/country";
+import { useRouter } from "next/navigation";
+import { Button, Card, Descriptions, Space } from "antd";
+import { ArrowLeftOutlined } from "@ant-design/icons";
 
-export default function CountryDetail({ country }: { country: Country }) {
+interface CountryDetailProps {
+  country: Country;
+  displayName: string;
+}
+
+export default function CountryDetail({ country }: CountryDetailProps) {
+  const router = useRouter();
+
   const nativeNameEntry = country.name.nativeName
     ? Object.values(country.name.nativeName)[0]
     : null;
@@ -14,7 +23,13 @@ export default function CountryDetail({ country }: { country: Country }) {
     : `${country.name.common}`;
 
   return (
-    <main className="p-8 max-w-4xl mx-auto">
+    <main className="p-8 max-w-4xl mx-auto space-y-4">
+      <Space>
+        <Button icon={<ArrowLeftOutlined />} onClick={() => router.back()}>
+          뒤로 가기
+        </Button>
+      </Space>
+
       <Card
         title={
           <div className="text-xl font-semibold flex items-center gap-3">
