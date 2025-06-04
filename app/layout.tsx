@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={montserrat.variable}>
+    <html lang="ko" className={montserrat.variable}>
       <body style={{ fontFamily: "var(--font-montserrat), sans-serif" }}>
         <ConfigProvider
           theme={{

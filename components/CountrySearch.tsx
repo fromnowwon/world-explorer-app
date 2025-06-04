@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Input, List, Typography } from "antd";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Input, List, Typography, Spin } from "antd";
 import CountryCard from "./CountryCard";
 import { Country } from "@/types/country";
 
@@ -13,22 +13,67 @@ interface CountrySearchProps {
 
 export default function CountrySearch({ countries }: CountrySearchProps) {
   const [search, setSearch] = useState("");
-  // 검색어에 따른 필터링
-  const filtered = countries.filter((c) => {
+
+  const batchSize = 20;
+
+  // 검색어 필터링
+  const filtered = useMemo(() => {
     const keyword = search.toLowerCase();
 
-    // translations 객체에서 모든 언어 이름 추출
-    const translatedNames = Object.values(c.translations || {}).map((t) =>
-      t.common.toLowerCase()
+    return countries.filter((c) => {
+      const translatedNames = Object.values(c.translations || {}).map((t) =>
+        t.common.toLowerCase()
+      );
+
+      return (
+        c.name.common.toLowerCase().includes(keyword) ||
+        c.capital?.[0]?.toLowerCase().includes(keyword) ||
+        c.region.toLowerCase().includes(keyword) ||
+        translatedNames.some((name) => name.includes(keyword))
+      );
+    });
+  }, [countries, search]);
+
+  const [visibleCountries, setVisibleCountries] = useState<Country[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 필터링 결과가 바뀌면 초기화
+  useEffect(() => {
+    setVisibleCountries(filtered.slice(0, batchSize));
+  }, [filtered]);
+
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          // 다음 배치 로딩 시작
+          setIsLoading(true);
+
+          setTimeout(() => {
+            setVisibleCountries((prev) => {
+              const nextBatch = filtered.slice(
+                prev.length,
+                prev.length + batchSize
+              );
+              if (nextBatch.length === 0) return prev;
+              return [...prev, ...nextBatch];
+            });
+            // 로딩 끝내기 (0.5초 후)
+            setIsLoading(false);
+          }, 500); // 0.5초 딜레이 줘서 로딩 UI 보이게 함
+        }
+      },
+      { threshold: 1 }
     );
 
-    return (
-      c.name.common.toLowerCase().includes(keyword) ||
-      c.capital?.[0]?.toLowerCase().includes(keyword) ||
-      c.region.toLowerCase().includes(keyword) ||
-      translatedNames.some((name) => name.includes(keyword))
-    );
-  });
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [filtered]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -48,22 +93,20 @@ export default function CountrySearch({ countries }: CountrySearchProps) {
       </div>
 
       <List
-        grid={{
-          gutter: 16,
-          xs: 1,
-          sm: 2,
-          md: 3,
-          lg: 4,
-          xl: 4,
-          xxl: 4,
-        }}
-        dataSource={filtered}
+        grid={{ gutter: 16, xs: 1, sm: 2, md: 3, lg: 4, xl: 4, xxl: 4 }}
+        dataSource={visibleCountries}
         renderItem={(country) => (
           <List.Item key={country.cca3}>
             <CountryCard country={country} />
           </List.Item>
         )}
       />
+
+      <div className="flex justify-center py-4">
+        {isLoading && <Spin size="large" />}
+      </div>
+
+      <div ref={loadMoreRef} className="h-1" />
     </div>
   );
 }
