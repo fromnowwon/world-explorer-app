@@ -96,6 +96,13 @@ export default function CountrySearch({ countries }: CountrySearchProps) {
           placeholder="국가 이름, 수도, 지역 검색"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          onSearch={(value) => {
+            if (value.trim() === "") {
+              alert("검색어를 입력하세요");
+              return;
+            }
+            setSearch(value);
+          }}
           allowClear
           className="w-full max-w-md shadow"
           size="large"
