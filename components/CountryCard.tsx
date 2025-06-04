@@ -14,17 +14,18 @@ export default function CountryCard({ country }: CountryCardProps) {
     <Link href={`/country/${country.cca3}`}>
       <Card
         hoverable
-        className="transition-shadow shadow-sm hover:shadow-md flex flex-col min-h-85"
+        className="transition-shadow shadow-sm hover:shadow-md flex flex-col min-h-91"
         cover={
           <div className="relative w-full aspect-[3/2] overflow-hidden rounded-t-lg">
             <Image
               src={country.flags.png}
               alt={`Flag of ${country.name.common}`}
               fill
-              style={{ objectFit: "cover" }}
+              style={{ objectFit: "cover", zIndex: 0 }}
+              sizes="(max-width: 768px) 100vw, 33vw"
               priority
             />
-            <div className="border-b border-gray-200"></div>
+            <div className="absolute bottom-0 left-0 right-0 border-b border-gray-200 z-10" />
           </div>
         }
       >
