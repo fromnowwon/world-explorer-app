@@ -8,7 +8,6 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 
 interface CountryDetailProps {
   country: Country;
-  displayName: string;
 }
 
 export default function CountryDetail({ country }: CountryDetailProps) {
