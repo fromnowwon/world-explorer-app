@@ -2,16 +2,12 @@ import { fetchCountries } from "@/lib/fetchCountries";
 import { notFound } from "next/navigation";
 import CountryDetail from "@/components/CountryDetail";
 
-interface CountryDetailPageProps {
-  params: {
-    cca: string;
-  };
-}
-
 export default async function CountryDetailPage({
   params,
-}: CountryDetailPageProps) {
-  const { cca } = params;
+}: {
+  params: Promise<{ cca: string }>;
+}) {
+  const { cca } = await params;
 
   const countries = await fetchCountries();
 
