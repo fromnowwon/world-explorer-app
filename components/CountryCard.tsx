@@ -11,19 +11,21 @@ interface CountryCardProps {
 
 export default function CountryCard({ country }: CountryCardProps) {
   return (
-    <Link href={`/country/${country.cca3}`} passHref>
+    <Link href={`/country/${country.cca3}`}>
       <Card
         hoverable
-        className="transition-shadow shadow-sm hover:shadow-md"
+        className="transition-shadow shadow-sm hover:shadow-md flex flex-col min-h-85"
         cover={
-          <Image
-            src={country.flags.png}
-            alt={`Flag of ${country.name.common}`}
-            width={240}
-            height={160}
-            style={{ objectFit: "cover", width: 240, height: 160 }}
-            priority
-          />
+          <div className="relative w-full aspect-[3/2] overflow-hidden rounded-t-lg">
+            <Image
+              src={country.flags.png}
+              alt={`Flag of ${country.name.common}`}
+              fill
+              style={{ objectFit: "cover" }}
+              priority
+            />
+            <div className="border-b border-gray-200"></div>
+          </div>
         }
       >
         <Title level={5} className="mb-2">
