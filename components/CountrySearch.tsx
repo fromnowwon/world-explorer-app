@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo } from "react";
 import { Input, List, Typography, Spin } from "antd";
+import debounce from "lodash/debounce";
 import CountryCard from "./CountryCard";
 import { Country } from "@/types/country";
 
@@ -13,12 +14,27 @@ interface CountrySearchProps {
 
 export default function CountrySearch({ countries }: CountrySearchProps) {
   const [search, setSearch] = useState("");
-
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const batchSize = 20;
+
+  // debounce 함수
+  const debounceSetSearch = useMemo(() => {
+    return debounce((value: string) => {
+      setDebouncedSearch(value);
+    }, 300);
+  }, []); // debounce 함수 재생성 방지
+
+  // search가 바뀔 때 debounce 적용
+  useEffect(() => {
+    debounceSetSearch(search);
+    return () => {
+      debounceSetSearch.cancel();
+    };
+  }, [search, debounceSetSearch]);
 
   // 검색어 필터링
   const filtered = useMemo(() => {
-    const keyword = search.toLowerCase();
+    const keyword = debouncedSearch.toLowerCase();
 
     return countries.filter((c) => {
       const translatedNames = Object.values(c.translations || {}).map((t) =>
@@ -32,12 +48,11 @@ export default function CountrySearch({ countries }: CountrySearchProps) {
         translatedNames.some((name) => name.includes(keyword))
       );
     });
-  }, [countries, search]);
+  }, [countries, debouncedSearch]);
 
   const [visibleCountries, setVisibleCountries] = useState<Country[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 필터링 결과가 바뀌면 초기화
   useEffect(() => {
     setVisibleCountries(filtered.slice(0, batchSize));
   }, [filtered]);
@@ -50,7 +65,6 @@ export default function CountrySearch({ countries }: CountrySearchProps) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          // 다음 배치 로딩 시작
           setIsLoading(true);
 
           setTimeout(() => {
@@ -62,9 +76,8 @@ export default function CountrySearch({ countries }: CountrySearchProps) {
               if (nextBatch.length === 0) return prev;
               return [...prev, ...nextBatch];
             });
-            // 로딩 끝내기 (0.5초 후)
             setIsLoading(false);
-          }, 500); // 0.5초 딜레이 줘서 로딩 UI 보이게 함
+          }, 200);
         }
       },
       { threshold: 1 }
