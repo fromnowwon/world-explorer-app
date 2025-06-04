@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { AntdRegistry } from "@ant-design/nextjs-registry";
 import "@ant-design/v5-patch-for-react-19";
+import { ConfigProvider } from "antd";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-montserrat",
+});
 
 export const metadata: Metadata = {
   title: "WORLD EXPLORER APP",
@@ -14,9 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
-      <body className={`antialiased`}>
-        <AntdRegistry>{children}</AntdRegistry>
+    <html lang="en" className={montserrat.variable}>
+      <body style={{ fontFamily: "var(--font-montserrat), sans-serif" }}>
+        <ConfigProvider
+          theme={{
+            token: {
+              fontFamily: "var(--font-montserrat), sans-serif",
+            },
+          }}
+        >
+          <AntdRegistry>{children}</AntdRegistry>
+        </ConfigProvider>
       </body>
     </html>
   );
